@@ -65,7 +65,7 @@
 		      t)))
 ;; (setq uimage-mode-image-regex-alist
 ;;   `((,(concat "\\(`\\|\\[\\[\\|<)\\)?"
-;; 	      "\\(\\(file://\\|ftp://\\|http://\\|https://\\)" uimage-mode-image-filename-regex "\\)"
+;; 	      "\\(\\(file:\\|ftp://\\|http://\\|https://\\)" uimage-mode-image-filename-regex "\\)"
 ;; 	      "\\(\\]\\]\\|>\\|'\\)?") . 2)))
 
 (defcustom uimage-mode-image-regex-alist
