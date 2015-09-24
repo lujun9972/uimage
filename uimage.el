@@ -149,7 +149,7 @@ Examples of image filename patterns to match:
 			;; remove them either (we may leave some of ours, and we
 			;; may remove other packages's display properties).
 			(if arg
-				(progn
+				(unless (eq 'image (car (get-text-property (match-beginning 0) 'display)))
 				  (save-match-data
 					(setq url-type (url-type (url-generic-parse-url url)))
 					(setq file-readable-p (cond ((equal url-type "ftp")
