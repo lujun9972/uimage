@@ -106,6 +106,24 @@ Examples of image filename patterns to match:
   (interactive)
   (uimage-mode 0))
 
+(defun uimage-display-images (&optional start end)
+  "display url between START and END as image"
+  (interactive "r")
+  (when (and (called-interactively-p 'any)
+			 (not (use-region-p)))
+	(setq start (point-min))
+	(setq end (point-max)))
+  (uimage-mode-buffer t start end))
+
+(defun uimage-no-images (&optional start end)
+  "display url between START and END as url"
+  (interactive "r")
+  (when (and (called-interactively-p 'any)
+			 (not (use-region-p)))
+	(setq start (point-min))
+	(setq end (point-max)))
+  (uimage-mode-buffer nil start end))
+
 (defun uimage-modification-hook (beg end)
   "Remove display property if a display region is modified."
   ;;(debug-print "ii1 begin %d, end %d\n" beg end)
@@ -135,14 +153,16 @@ Examples of image filename patterns to match:
 										   (uimage-modification-hook))))))
 	(kill-buffer)))
 
-(defun uimage-mode-buffer (arg)
+(defun uimage-mode-buffer (arg &optional start end)
   "Display images if ARG is non-nil, undisplay them otherwise."
-  (let (url url-type url-readable-p)
+  (let ((start (or start (point-min)))
+		(end (or end (point-max)))
+		url url-type url-readable-p)
     (with-silent-modifications
       (save-excursion
-        (goto-char (point-min))
+        (goto-char start)
         (dolist (pair uimage-mode-image-regex-alist)
-          (while (re-search-forward (car pair) nil t)
+          (while (re-search-forward (car pair) end t)
 			(setq url (match-string (cdr pair)))
             
 			;; FIXME: we don't mark our images, so we can't reliably
