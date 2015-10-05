@@ -67,6 +67,9 @@
 (defcustom uimage-mode-image-regex-alist
   `((,(concat "\\(`\\|\\[\\[\\|<)\\)?"
 	      "\\(\\(file://\\|ftp://\\|http://\\|https://\\)" uimage-mode-image-filename-regex "\\)"
+	      "\\(\\]\\]\\|>\\|'\\)?") . 2)
+	(,(concat "\\(`\\|\\[\\[\\|<)\\)"
+	      "\\(" uimage-mode-image-filename-regex "\\)"
 	      "\\(\\]\\]\\|>\\|'\\)?") . 2))
   "Alist of filename REGEXP vs NUM.
 Each element looks like (REGEXP . NUM).
@@ -77,6 +80,9 @@ Examples of image filename patterns to match:
     `file://foo.png'
     \\[\\[file://foo.gif]]
     <file://foo.png>
+    `foo.png'
+    \\[\\[foo.gif]]
+    <foo.png>
 "
   :type '(alist :key-type regexp :value-type integer)
   :group 'uimage)
@@ -179,9 +185,17 @@ Examples of image filename patterns to match:
 												((equal url-type "http")
 												 (url-http-file-readable-p url))
 												((equal url-type "https")
-												 (url-https-file-readable-p url)))))
+												 (url-https-file-readable-p url))
+												(t
+												 (setq url-type nil)
+												 (file-readable-p url)))))
 				  (when file-readable-p
-					(url-queue-retrieve url #'uimage-display-inline-images-callback `(,(match-beginning 0) ,(match-end 0) nil ,(current-buffer)))))
+					(if url-type
+						(url-queue-retrieve url #'uimage-display-inline-images-callback `(,(match-beginning 0) ,(match-end 0) nil ,(current-buffer)))
+					  (add-text-properties (match-beginning 0) (match-end 0)
+										   `(display ,(create-image url)
+													 modification-hooks
+													 (uimage-modification-hook))))))
 			  (remove-text-properties (match-beginning 0) (match-end 0)
 									  '(display modification-hooks)))))))))
 
