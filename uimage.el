@@ -181,7 +181,7 @@ Examples of image filename patterns to match:
 												((equal url-type "https")
 												 (url-https-file-readable-p url)))))
 				  (when file-readable-p
-					(url-retrieve url #'uimage-display-inline-images-callback `(,(match-beginning 0) ,(match-end 0) nil ,(current-buffer)))))
+					(url-queue-retrieve url #'uimage-display-inline-images-callback `(,(match-beginning 0) ,(match-end 0) nil ,(current-buffer)))))
 			  (remove-text-properties (match-beginning 0) (match-end 0)
 									  '(display modification-hooks)))))))))
 
