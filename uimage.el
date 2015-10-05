@@ -162,7 +162,7 @@ Examples of image filename patterns to match:
 				(unless (eq 'image (car (get-text-property (match-beginning 0) 'display)))
 				  (save-match-data
 					(setq url-type (url-type (url-generic-parse-url url)))
-					(setq file-readable-p (cond ((equal url-type "ftp")
+					(setq url-readable-p (cond ((equal url-type "ftp")
 												 (url-ftp-file-readable-p url))
 												((equal url-type "file")
 												 (url-file-file-readable-p url))
@@ -173,7 +173,7 @@ Examples of image filename patterns to match:
 												(t
 												 (setq url-type nil)
 												 (file-readable-p url)))))
-				  (when file-readable-p
+				  (when url-readable-p
 					(if url-type
 						(url-queue-retrieve url #'uimage-display-inline-images-callback `(,(match-beginning 0) ,(match-end 0) nil ,(current-buffer)))
 					  (add-text-properties (match-beginning 0) (match-end 0)
