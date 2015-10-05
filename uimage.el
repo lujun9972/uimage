@@ -5,7 +5,7 @@
 ;; Author: DarkSun <lujun9972@gmail.com>
 ;; Keywords: multimedia
 
-;; This file is part of GNU Emacs.
+;; This file is not part of GNU Emacs.
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -63,10 +63,6 @@
 				     image-file-name-extensions)
 			     image-file-name-extensions)
 		      t)))
-;; (setq uimage-mode-image-regex-alist
-;;   `((,(concat "\\(`\\|\\[\\[\\|<)\\)?"
-;; 	      "\\(\\(file:\\|ftp://\\|http://\\|https://\\)" uimage-mode-image-filename-regex "\\)"
-;; 	      "\\(\\]\\]\\|>\\|'\\)?") . 2)))
 
 (defcustom uimage-mode-image-regex-alist
   `((,(concat "\\(`\\|\\[\\[\\|<)\\)?"
@@ -91,11 +87,15 @@ Examples of image filename patterns to match:
     map)
   "Keymap used in `uimage-mode'.")
 
-(defun uimage-recenter (&optional arg)
+(defun uimage-recenter (&optional arg start end)
   "Re-draw images and recenter."
-  (interactive "P")
-  (uimage-mode-buffer nil)
-  (uimage-mode-buffer t)
+  (interactive "P\nr")
+  (when (and (called-interactively-p 'any)
+			 (not (use-region-p)))
+	(setq start (point-min))
+	(setq end (point-max)))
+  (uimage-mode-buffer nil start end)
+  (uimage-mode-buffer t start end)
   (recenter arg))
 
 ;;;###autoload
