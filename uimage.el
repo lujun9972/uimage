@@ -162,7 +162,7 @@ Examples of image filename patterns to match:
 										   (uimage-modification-hook))))))
 	(kill-buffer)))
 
-(defun uimage-mode--url-readable-p (url)
+(defun uimage--url-readable-p (url)
 (save-match-data
   (let ((url-type (url-type (url-generic-parse-url url))))
 	(cond ((equal url-type "ftp")
@@ -176,7 +176,7 @@ Examples of image filename patterns to match:
 		  (t
 		   (file-readable-p url))))))
 
-(defun uimage-mode--url-retrievable-p (url)
+(defun uimage--url-retrievable-p (url)
   (save-match-data
 	(let ((url-type (url-type (url-generic-parse-url url))))
 	  (member url-type '("ftp" "file" "http" "https")))))
@@ -197,8 +197,8 @@ Examples of image filename patterns to match:
 			;; may remove other packages's display properties).
 			(if arg
 				(unless (eq 'image (car (get-text-property (match-beginning 0) 'display)))
-				  (when (uimage-mode--url-readable-p url)
-					(if (uimage-mode--url-retrievable-p url)
+				  (when (uimage--url-readable-p url)
+					(if (uimage--url-retrievable-p url)
 						(url-queue-retrieve url #'uimage-display-inline-images-callback `(,(match-beginning 0) ,(match-end 0) nil ,(current-buffer)))
 					  (add-text-properties (match-beginning 0) (match-end 0)
 										   `(display ,(create-image url)
