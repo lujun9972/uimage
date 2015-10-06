@@ -24,6 +24,7 @@
 ;;
 ;; uimage's code can be found here:
 ;;   http://github.com/lujun9972/uimage
+
 ;;; Commentary:
 
 ;; Uimage is a iimange like minor mode but could displays url images
@@ -50,8 +51,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'image-file))
+(require 'image-file)
 
 (defgroup uimage nil
   "Support for url images."
