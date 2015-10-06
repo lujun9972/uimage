@@ -162,38 +162,43 @@ Examples of image filename patterns to match:
 										   (uimage-modification-hook))))))
 	(kill-buffer)))
 
+(defun uimage-mode--url-readable-p (url)
+(save-match-data
+  (let ((url-type (url-type (url-generic-parse-url url))))
+	(cond ((equal url-type "ftp")
+		   (url-ftp-file-readable-p url))
+		  ((equal url-type "file")
+		   (url-file-file-readable-p url))
+		  ((equal url-type "http")
+		   (url-http-file-readable-p url))
+		  ((equal url-type "https")
+		   (url-https-file-readable-p url))
+		  (t
+		   (file-readable-p url))))))
+
+(defun uimage-mode--url-retrievable-p (url)
+  (save-match-data
+	(let ((url-type (url-type (url-generic-parse-url url))))
+	  (member url-type '("ftp" "file" "http" "https")))))
+
 (defun uimage-mode-buffer (arg &optional start end)
   "Display images if ARG is non-nil, undisplay them otherwise."
   (let ((start (or start (point-min)))
 		(end (or end (point-max)))
-		url url-type url-readable-p)
-    (with-silent-modifications
-      (save-excursion
-        (goto-char start)
-        (dolist (pair uimage-mode-image-regex-alist)
-          (while (re-search-forward (car pair) end t)
+		url)
+	(with-silent-modifications
+	  (save-excursion
+		(goto-char start)
+		(dolist (pair uimage-mode-image-regex-alist)
+		  (while (re-search-forward (car pair) end t)
 			(setq url (match-string (cdr pair)))
-            
 			;; FIXME: we don't mark our images, so we can't reliably
 			;; remove them either (we may leave some of ours, and we
 			;; may remove other packages's display properties).
 			(if arg
 				(unless (eq 'image (car (get-text-property (match-beginning 0) 'display)))
-				  (save-match-data
-					(setq url-type (url-type (url-generic-parse-url url)))
-					(setq url-readable-p (cond ((equal url-type "ftp")
-												 (url-ftp-file-readable-p url))
-												((equal url-type "file")
-												 (url-file-file-readable-p url))
-												((equal url-type "http")
-												 (url-http-file-readable-p url))
-												((equal url-type "https")
-												 (url-https-file-readable-p url))
-												(t
-												 (setq url-type nil)
-												 (file-readable-p url)))))
-				  (when url-readable-p
-					(if url-type
+				  (when (uimage-mode--url-readable-p url)
+					(if (uimage-mode--url-retrievable-p url)
 						(url-queue-retrieve url #'uimage-display-inline-images-callback `(,(match-beginning 0) ,(match-end 0) nil ,(current-buffer)))
 					  (add-text-properties (match-beginning 0) (match-end 0)
 										   `(display ,(create-image url)
