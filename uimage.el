@@ -52,6 +52,7 @@
 ;;; Code:
 
 (require 'image-file)
+(require 'url-queue)
 
 (defgroup uimage nil
   "Support for url images."
