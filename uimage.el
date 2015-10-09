@@ -190,8 +190,8 @@ Examples of image filename patterns to match:
 		url)
 	(with-silent-modifications
 	  (save-excursion
-		(goto-char start)
 		(dolist (pair uimage-mode-image-regex-alist)
+		  (goto-char start)
 		  (while (re-search-forward (car pair) end t)
 			(setq url (match-string (cdr pair)))
 			;; FIXME: we don't mark our images, so we can't reliably
