@@ -53,6 +53,9 @@
 
 (require 'image-file)
 (require 'url-queue)
+(require 'url-file)
+(require 'url-http)
+(require 'url-ftp)
 
 (defgroup uimage nil
   "Support for url images."
