@@ -1,4 +1,4 @@
-;;; uimage.el --- Url image minor mode.
+;;; uimage.el --- An iimage like mode with the ability to display url images
 
 ;; Copyright (C) 2004-2015 Free Software Foundation, Inc.
 

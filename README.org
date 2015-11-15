@@ -6,3 +6,5 @@ before enable the uimage-mode:
 
 after enable the uimage-mode:
 [[file:after_uimage.png]]
+
+after enable the uimage-mode, you can use ~C-c C-c~ to refresh the images. With a region active, It will only refresh the images in the region.
