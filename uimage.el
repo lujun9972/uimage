@@ -51,6 +51,7 @@
 
 ;;; Code:
 
+(require 'image)
 (require 'image-file)
 (require 'url-queue)
 (require 'url-file)
@@ -151,7 +152,7 @@ Examples of image filename patterns to match:
                               '(display nil modification-hooks nil)))))
 
 
-(defun uimage-display-inline-images-callback (status start end ori-buffer)
+(defun uimage-display-inline-images-callback (status start end ori-buffer &optional image-type)
   (unwind-protect
 	  (let (file-data)
 		(goto-char (point-min))
@@ -162,6 +163,7 @@ Examples of image filename patterns to match:
 		  (with-current-buffer ori-buffer
 			(add-text-properties start end
 								 `(display ,(or (create-image file-data nil t)
+                                                (create-image file-data image-type t)
 												(create-image file-data 'imagemagick t))
 										   modification-hooks
 										   (uimage-modification-hook))))))
@@ -186,6 +188,16 @@ Examples of image filename patterns to match:
 	(let ((url-type (url-type (url-generic-parse-url url))))
 	  (member url-type '("ftp" "file" "http" "https")))))
 
+(defun uimage--guess-image-type-by-extension (url)
+  "Return image type by URL's extension"
+  (let* ((extension (file-name-extension url))
+         (image-type-symbol (cond ((string= "jpg" extension)
+                                   'jpeg)
+                                  (t (intern extension)))))
+    (when (image-type-available-p image-type-symbol)
+      image-type-symbol)))
+
+
 (defun uimage-mode-buffer (arg &optional start end)
   "Display images if ARG is non-nil, undisplay them otherwise."
   (let ((start (or start (point-min)))
@@ -204,7 +216,7 @@ Examples of image filename patterns to match:
 				(unless (eq 'image (car (get-text-property (match-beginning 0) 'display)))
 				  (when (uimage--url-readable-p url)
 					(if (uimage--url-retrievable-p url)
-						(url-queue-retrieve url #'uimage-display-inline-images-callback `(,(match-beginning 0) ,(match-end 0) ,(current-buffer)))
+						(url-queue-retrieve url #'uimage-display-inline-images-callback `(,(match-beginning 0) ,(match-end 0) ,(current-buffer) ,(uimage--guess-image-type-by-extension url)))
 					  (add-text-properties (match-beginning 0) (match-end 0)
 										   `(display ,(or (create-image url)
 														  (create-image url 'imagemagick))
