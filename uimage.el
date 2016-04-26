@@ -1,6 +1,6 @@
 ;;; uimage.el --- An iimage like mode with the ability to display url images
 
-;; Copyright (C) 2004-2015 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2015 DarkSun <lujun9972@gmail.com>.
 
 ;; Author: DarkSun <lujun9972@gmail.com>
 ;; Keywords: lisp, url, image
@@ -168,18 +168,18 @@ Examples of image filename patterns to match:
 	(kill-buffer)))
 
 (defun uimage--url-readable-p (url)
-(save-match-data
-  (let ((url-type (url-type (url-generic-parse-url url))))
-	(cond ((equal url-type "ftp")
-		   (url-ftp-file-readable-p url))
-		  ((equal url-type "file")
-		   (url-file-file-readable-p url))
-		  ((equal url-type "http")
-		   (url-http-file-readable-p url))
-		  ((equal url-type "https")
-		   (url-https-file-readable-p url))
-		  (t
-		   (file-readable-p url))))))
+  (save-match-data
+    (let ((url-type (url-type (url-generic-parse-url url))))
+      (cond ((equal url-type "ftp")
+             (url-ftp-file-readable-p url))
+            ((equal url-type "file")
+             (url-file-file-readable-p url))
+            ((equal url-type "http")
+             (url-http-file-readable-p url))
+            ((equal url-type "https")
+             (url-https-file-readable-p url))
+            (t
+             (file-readable-p url))))))
 
 (defun uimage--url-retrievable-p (url)
   (save-match-data
