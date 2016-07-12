@@ -57,6 +57,7 @@
 (require 'url-file)
 (require 'url-http)
 (require 'url-ftp)
+(require 'cl-lib)
 
 (defgroup uimage nil
   "Support for url images."
@@ -161,12 +162,13 @@ Examples of image filename patterns to match:
 		  (setq file-data (buffer-substring-no-properties (+ (point) 1) (point-max))))
 		(when file-data
 		  (with-current-buffer ori-buffer
-			(add-text-properties start end
-								 `(display ,(or (create-image file-data nil t)
-                                                (create-image file-data guessed-image-type t)
-												(error "unsupported image type"))
-										   modification-hooks
-										   (uimage-modification-hook))))))
+            (unless (text-property-any start end 'modification-hooks '(uimage-modification-hook))
+              (add-text-properties start end
+                                   `(display ,(or (create-image file-data nil t)
+                                                  (create-image file-data guessed-image-type t)
+                                                  (error "unsupported image type"))
+                                             modification-hooks
+                                             (uimage-modification-hook)))))))
 	(kill-buffer)))
 
 (defun uimage--url-readable-p (url)
@@ -199,29 +201,35 @@ Examples of image filename patterns to match:
 (defun uimage-mode-buffer (arg &optional start end)
   "Display images if ARG is non-nil, undisplay them otherwise."
   (let ((start (or start (point-min)))
-		(end (or end (point-max)))
-		url)
-	(with-silent-modifications
-	  (save-excursion
-		(dolist (pair uimage-mode-image-regex-alist)
-		  (goto-char start)
-		  (while (re-search-forward (car pair) end t)
-			(setq url (match-string (cdr pair)))
-			;; FIXME: we don't mark our images, so we can't reliably
-			;; remove them either (we may leave some of ours, and we
-			;; may remove other packages's display properties).
-			(if arg
-				(unless (eq 'image (car (get-text-property (match-beginning 0) 'display)))
-				  (when (uimage--url-readable-p url)
-					(if (uimage--url-retrievable-p url)
-						(url-queue-retrieve url #'uimage-display-inline-images-callback `(,(match-beginning 0) ,(match-end 0) ,(current-buffer) ,(uimage--guess-image-type url)))
-					  (add-text-properties (match-beginning 0) (match-end 0)
-										   `(display ,(or (create-image url)
-														  (create-image url 'imagemagick))
-													 modification-hooks
-													 (uimage-modification-hook))))))
-			  (remove-text-properties (match-beginning 0) (match-end 0)
-									  '(display modification-hooks)))))))))
+        (end (or end (point-max)))
+        url)
+    (with-silent-modifications
+      (save-excursion
+        (dolist (pair uimage-mode-image-regex-alist)
+          (goto-char start)
+          (while (re-search-forward (car pair) end t)
+            (setq url (match-string (cdr pair)))
+            ;; FIXME: we don't mark our images, so we can't reliably
+            ;; remove them either (we may leave some of ours, and we
+            ;; may remove other packages's display properties).
+            (let ((start (match-beginning 0))
+                  (end (match-end 0))
+                  (contain-image-p (lambda (start end)
+                                     (cl-some (lambda (idx)
+                                                  (eq 'image (car (get-text-property idx 'display))))
+                                                (cl-loop for i from start to end collect i)))))
+              (if arg
+                  (unless (funcall contain-image-p start end) 
+                    (when (uimage--url-readable-p url)
+                      (if (uimage--url-retrievable-p url)
+                          (url-queue-retrieve url #'uimage-display-inline-images-callback `(,start ,end ,(current-buffer) ,(uimage--guess-image-type url)))
+                        (add-text-properties start end
+                                             `(display ,(or (create-image url)
+                                                            (create-image url 'imagemagick))
+                                                       modification-hooks
+                                                       (uimage-modification-hook))))))
+                (remove-text-properties start end
+                                        '(display modification-hooks))))))))))
 
 ;;;###autoload
 (define-minor-mode uimage-mode nil
