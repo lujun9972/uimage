@@ -217,7 +217,7 @@ Examples of image filename patterns to match:
                   (contain-image-p (lambda (start end)
                                      (cl-some (lambda (idx)
                                                   (eq 'image (car (get-text-property idx 'display))))
-                                                (cl-loop for i from start to end collect i)))))
+                                                (number-sequence start end)))))
               (if arg
                   (unless (funcall contain-image-p start end) 
                     (when (uimage--url-readable-p url)
