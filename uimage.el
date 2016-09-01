@@ -155,7 +155,8 @@ Examples of image filename patterns to match:
 
 (defun uimage-display-inline-images-callback (status start end ori-buffer &optional guessed-image-type)
   (unwind-protect
-	  (let (file-data)
+      (let ((file-data)
+            (inhibit-read-only t))
 		(goto-char (point-min))
 		(search-forward-regexp "^$")
 		(unless (= (point) (point-max))
